@@ -1,0 +1,124 @@
+The Martini Web Framework
+A gentle introduction
+14:00 27 Feb 2014
+Tags: go webframework martini
+
+Eric Gravert
+Lead Software Engineer, ModCloth, Inc.
+e.gravert@modcloth.com
+
+
+* First, a bit of background
+Originally, we had net/http, and life was good
+
+.play examples/http1.go
+
+- Cannot use the HTTP Method to route requests
+- All handlers must of type `func(ResponseWriter, *Request)`
+- Regex pattern matching not supported
+
+
+* What is Martini?
+- A Go package for developing web applications and services.
+- Micro-framework
+- Extends the functionality of Go's built-in http package.
+
+** DEMO!
+
+.play example1.go
+
+* Ok, that's awesome, but why do I care?!
+
+
+* and some background on how the http package works
+
+* Base functionaily is provided through...
+- Routing
+- Handlers
+- Services
+- Middleware
+
+
+* Routing
+.link http://godoc.org/github.com/codegangsta/martini#Router martini.Router
+- Associates an HTTP Method and URL pattern to a series of Handlers
+- Allows for named parameters in the URL
+- Routes can be matched with regular expressions and globs as well
+- Parametes are available through the martini.Params service
+
+* Handlers
+- link http://godoc.org/github.com/codegangsta/martini#Handler martini.Handler
+- Callable functions that are mapped to a given request in the router
+- Can return a string or string and int to return a result and status to the client
+- Arguments for handlers are resolved using reflection and the provided services.
+
+
+* Using Routing and Handlers together
+** Examples!!
+
+  m.Get("/", func() string {
+    return "hello world" // HTTP 200 : "hello world"
+  })
+
+  m.Get("/", func(params martini.Params) string {
+    return "Hello " + params["name"]
+  })
+ 
+* Stacking handlers
+
+  // router configuration
+  m.Post("/book/new", Authorize, AddBook)
+
+  // leverage sessions package to see if user
+  // has access to the given resource
+  func Authorize(session sessions..Session) {
+    // validate session cookie
+  }
+
+  // use params packge and 
+  func AddBook(params martin.Params, db sql.DB) {
+    // parse the params and create a new book
+  }
+
+* Services
+Services are the objects that can be injected into the handler argument list
+they can be provided at two levels, globally, and per-request.
+
+It is also possible to map a value to an interface.
+
+* Middleware
+Global handlers that are called before each request
+* Router is the final middleware handler!
+ Useful for providing services like authorization, logging, and error pages
+ and serving static pages
+
+* Available middleware - martini-contrib
+
+* Render
+
+
+* Binding
+
+* secure & cors
+
+* static! 
+
+
+
+
+* Testing
+  - Can use the "net/http/httptest"
+  - Make sure to design code to isolate the martini multiplexer from startup.
+
+
+* Issues (here be opinions)
+ - Does not provide a guide for how to structure a project
+ - No tooling to help with packaging & deploying applications that include assets
+ - Some of the middleware is very immature and is more useful as a guideline
+
+
+* Further Reading
+- link https://github.com/codegangsta/martini Martini Web Framework on Github
+- link https://github.com/martini-contrib Martini Contrib on Github
+- link http://blog.gopheracademy.com/day-11-martini Building a Christmas Wishlist with Martini
+
