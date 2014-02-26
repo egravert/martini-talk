@@ -8,34 +8,75 @@ Lead Software Engineer, ModCloth, Inc.
 e.gravert@modcloth.com
 
 
-* First, a bit of background
-Originally, we had net/http, and life was good
+* But First, a bit of background...
 
-.play examples/http1.go
+* Originally, we had net/http, and life was good
 
-- Cannot use the HTTP Method to route requests
-- All handlers must of type `func(ResponseWriter, *Request)`
+.play examples/http1.go /START OMIT/,/END OMIT/
+
+- Register handlers with the DefaultServeMux
+- Path matching is from most specific to least
+- All handlers must of type func(ResponseWriter, *Request)
+
+
+* net/http Continued...
+.play examples/http2.go /START OMIT/,/END OMIT/
+
+- DefaultServeMux can be replaced with a custom dispatcher
+- Any type that implements ServeHTTP(w ResponseWriter, req *Request) is valid
+
+
+* So what's the big deal?
+
+*Pro's*
+
+- Simple and Fast
+- Provides enough out of the box functionality to roll your own services
+- Highly extensible 
+
+*Cons*
+
+- DefaultServeMux does not support routing based on the HTTP Method
 - Regex pattern matching not supported
+- No session management, request context etc.
+- Only supports the Handler interface
 
+* Martini
 
 * What is Martini?
-- A Go package for developing web applications and services.
-- Micro-framework
-- Extends the functionality of Go's built-in http package.
 
-** DEMO!
+- A Go package for developing web applications and services
+- Microframework
+- Extends the functionality of Go's built-in net/http package
+- Uses reflection and dependency injection to add 
 
+* Our first example
 .play example1.go
 
-* Ok, that's awesome, but why do I care?!
+* Out of the box features
+.play example1.go /START OMIT/,/END OMIT/ HLCLASSIC
 
+A Classic Martini includes the following services
 
-* and some background on how the http package works
-
-* Base functionaily is provided through...
+- Logging
+- Context
+- Params
 - Routing
-- Handlers
-- Services
+- http.ResponseWriter & http.Request
+
+* Out of the box features
+.play example1.go /START OMIT/,/END OMIT/ HLROUTE
+
+Routing
+- Full support for Method based routing
+- Regex pattern matching of routes
+
+
+* Martini Base functionaily is provided through...
+Martini does this by adding the following concepts to the http request pipeline
+- Routing - 
+- Handlers - A handler is any callable function
+- Services - Functions that 
 - Middleware
 
 
@@ -118,7 +159,7 @@ Global handlers that are called before each request
 
 
 * Further Reading
-- link https://github.com/codegangsta/martini Martini Web Framework on Github
-- link https://github.com/martini-contrib Martini Contrib on Github
-- link http://blog.gopheracademy.com/day-11-martini Building a Christmas Wishlist with Martini
-
+- [[https://github.com/codegangsta/martini][Martini Web Framework on Github]]
+- [[https://github.com/martini-contrib][Martini Contrib on Github]]
+- [[http://blog.gopheracademy.com/day-11-martini][Building a Christmas Wishlist with Martini]]
+- [[https://gophercasts.io/][GopherCasts]]
