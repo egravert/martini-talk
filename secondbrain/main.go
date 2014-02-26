@@ -2,7 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"net/http"
+	"os"
 
 	"github.com/codegangsta/martini"
 	_ "github.com/lib/pq"
@@ -10,21 +10,20 @@ import (
 	"github.com/martini-contrib/render"
 )
 
+//postgres://localhost/secondbrain?sslmode=disable")
 func SetupDb() *sql.DB {
-	db, _ := sql.Open("postgres", "postgres://localhost/secondbrain?sslmode=disable")
+	db, _ := sql.Open("postgres", os.Getenv("PSQL_URI"))
 	return db
 }
 
 func main() {
-
-	m := routing()
-
+	m := Shaken()
 	// start the application
 	// Run calls ListenAndServe
 	m.Run()
 }
 
-func routing() *martini.ClassicMartini {
+func Shaken() *martini.ClassicMartini {
 	// create a martini mux with happy defaults
 	m := martini.Classic()
 
@@ -43,10 +42,11 @@ func routing() *martini.ClassicMartini {
 
 func ShowNotes(r render.Render, ns NoteStorer) {
 	notes := ns.All()
-	r.HTML(200, "books", notes)
+	r.HTML(200, "notes", notes) // HLRENDER
 }
 
-func NewNote(note Note, w http.ResponseWriter, r *http.Request, ns NoteStorer) {
+func NewNote(note Note, r render.Render, ns NoteStorer) {
 	ns.Add(note)
-	http.Redirect(w, r, "/", http.StatusCreated)
+	notes := ns.All()
+	r.HTML(200, "notes", notes) // HLRENDER
 }
