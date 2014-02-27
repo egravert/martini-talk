@@ -16,7 +16,7 @@ e.gravert@modcloth.com
 
 - Register handlers with the DefaultServeMux
 - Path matching is from most specific to least
-- All handlers must of type func(ResponseWriter, *Request)
+- All handlers must be of type func(ResponseWriter, *Request)
 
 
 * net/http continued...
@@ -182,10 +182,10 @@ See the full list at [[https://github.com/martini-contrib][github.com/martini-co
 Demo time!
 [[http://localhost:8020][Second Brain]]
 
-* Issues (here be opinions)
- - Does not provide a guide for how to structure a project
- - No tooling to help with packaging & deploying applications that include assets
- - Some of the middleware is very immature and is more useful as a guideline
+* Final Thoughts
+- Does not provide a guide for how to structure a project
+- No tooling to help with packaging & deploying applications that include assets
+- Some of the middleware is very immature and is more useful as a guideline
 
 
 * Further Reading
@@ -193,3 +193,4 @@ Demo time!
 - [[https://github.com/martini-contrib][Martini Contrib on Github]]
 - [[http://blog.gopheracademy.com/day-11-martini][Building a Christmas Wishlist with Martini]]
 - [[https://gophercasts.io/][GopherCasts]]
+- [[https://github.com/egravert/martini-talk][This talk plus a simple example]]
