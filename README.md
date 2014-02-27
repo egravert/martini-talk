@@ -1,14 +1,17 @@
 martini-talk
 ============
 
-To run the talk, install the present tool with the following command:
+# To run the talk
+
+* Install the present tool with the following command:
 ` code.google.com/p/go.talks/pkg/present`
 
-Make sure `$GOPATH/bin` is in your `$PATH` and run `present` from the base directory of this repo.
+* Make sure `$GOPATH/bin` is in your `$PATH`
+* Run `present` from the base directory of this repo.
 
 
 
-==To run the example application==
+# To run the example application#
 
 * Create a postgresql database and execute the sql in the `secondbrain/create.sql` file.
 * cd to the secondbrain directory
