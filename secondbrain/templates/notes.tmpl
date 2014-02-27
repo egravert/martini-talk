@@ -1,12 +1,12 @@
 <div class='container-fluid sticky-area'>
   {{ range . }}
   <div class='col-md-4'>
-	<p>{{.Tags}}</p>
-	<p>{{.Note}}</p>
-	<p>{{.CreatedAt.Format "2006-01-02 3:04PM"}}</p>
+    <p class='tags'>{{.Tags}}</p>
+    <p class='note'>{{.Note}}</p>
+    <p class='created-at'>{{.CreatedAt.Format "2006-01-02 3:04PM"}}</p>
   </div>
   {{ end }}
-  <div class='col-md-4'>
+  <div class='col-md-4 add-note'>
 	<h3><button class="btn btn-primary" data-toggle="modal" data-target="#addNote" >Add Note</button></h3>
   </div>
 
