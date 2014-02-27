@@ -8,7 +8,7 @@ Lead Software Engineer, ModCloth, Inc.
 e.gravert@modcloth.com
 
 
-* But First, a bit of background...
+* But first, a bit of background...
 
 * Originally, we had net/http, and life was good
 
@@ -19,91 +19,60 @@ e.gravert@modcloth.com
 - All handlers must of type func(ResponseWriter, *Request)
 
 
-* net/http Continued...
+* net/http continued...
 .play examples/http2.go /START OMIT/,/END OMIT/
 
 - DefaultServeMux can be replaced with a custom dispatcher
 - Any type that implements ServeHTTP(w ResponseWriter, req *Request) is valid
 
 
-* So what's the big deal?
+* net/http conclusion
 
-*Pro's*
+net/http is an elegantly written, highly customizable, http server.
+It is a great starting point for building your services and web applications.
 
-- Simple and Fast
-- Provides enough out of the box functionality to roll your own services
-- Highly extensible 
 
-*Cons*
+* Introducing....
 
-- DefaultServeMux does not support routing based on the HTTP Method
-- Regex pattern matching not supported
-- No session management, request context etc.
-- Only supports the Handler interface
+* Martini!!
 
-* Martini
+.image MartiniGlass.png 370 200
 
 * What is Martini?
 
 - A Go package for developing web applications and services
-- Microframework
-- Extends the functionality of Go's built-in net/http package
-- Uses reflection and dependency injection to add 
+- Implements http.Handler to extend the functionality of net/http
+- Improves the routing capabilities by supporting HTTP Methods and regex pattern matching
+- Provides additional services such as sessions, template rendering, and form field bindings through middleware
+- Uses reflection and dependency injection to allow for handlers to be more flexible
 
 * Our first example
 .play examples/martini1.go
 
-* Out of the box features
 
-.play examples/martini1.go /START OMIT/,/END OMIT/ HLCLASSIC
-
-A Classic Martini includes the following services
-
-- Logging
-- Context
-- Params
-- Routing
-- http.ResponseWriter & http.Request
-
-
-- Full support for Method based routing
-- Regex pattern matching of routes
-- Route parameters can be accessed through `martini.Params`
-
-
-* Martini introduces the following concepts
-- Routing -  
-- Handlers - A handler is any callable function
-- Services - Functions that 
-- Middleware
-
+* Martini provides this functionality by adding the following features
+- Advanced Router -  Multiplexer that routes an http request to a handler
+- Handlers        - Any callable function
+- Services        - Objects used to fulfill the argument requirements of handlers
+- Middleware      - Global handlers.  They are called for every request, and often effect the request context
 
 * Routing
+Associates an HTTP Method and URL pattern to a series of Handlers
+
 .play examples/martini1.go /START OMIT/,/END OMIT/ HLROUTE
 
-- Associates an HTTP Method and URL pattern to a series of Handlers
-- Allows for named parameters in the URL
+- Supports Method based routes
 - Routes can be matched with regular expressions and globs as well
-- Query parameters are available through the martini.Params service
+- Route parameters can be accessed through `martini.Params`
+- See [[http://godoc.org/github.com/codegangsta/martini#Router][martini.Router]] for more info
 
 * Handlers
-Are callable functions that are mapped to a given request in the router
+Are callable functions that are mapped to a given request by the router
 
 - Can return a string or string and int to return a result and status to the client
-- Arguments for handlers are resolved using reflection and passed in values provided through services.
-- If a handler returns a string, or int,string pair, the values will be written back to the ResponseWriter
-- A route can specify multiple handlers
-
-
-* Using Routing and Handlers together
-
-  m.Get("/", func() string {
-    return "hello world" // HTTP 200 : "hello world"
-  })
-
-  m.Get("/", func(params martini.Params) string {
-    return "Hello " + params["name"]
-  })
+- The arguments for handlers are provided through services
+- If a handler returns a string, or (int, string) pair, the values will be written to the ResponseWriter
+- A route can specify multiple, sequential handlers
 
 * Stacking handlers
 
@@ -112,26 +81,46 @@ Are callable functions that are mapped to a given request in the router
 
   // leverage sessions package to see if user
   // has access to the given resource
-  func Authorize(session sessions..Session) {
+  func Authorize(session sessions.Session) {
     // validate session cookie
   }
 
-  // use params packge and 
-  func AddBook(params martin.Params, db sql.DB) {
-    // parse the params and create a new book
+  func AddBook(req *http.Request, db sql.DB) {
+    // parse the request and create a new book
   }
+
 
 * Services
 Services are the objects that can be injected into the handler argument list
-they can be provided at two levels, globally, and per-request.
+they can be provided at two levels, globally, and per-request
 
-It is also possible to map a value to an interface.
+- Adding a type service
+  st := &Storer{}
+  m.Map(st) // this service will be available to all handlers as *Storer
+
+- Mapping a value to an interface
+  st := &MysqlStorer{}
+  m.MapTo(st, (*Storer)(nil)) // Maps type MysqlStorer to the Storer interface
+
+- Mapping a service within a request
+  // within a handler (global or request lvl)
+  func MyHandler(c martini.Context, s sessions.Session, ul *UserLookup) {
+    user := ul.LookupUser(s.Get("user-token"))
+    c.Map(user)
+  }
 
 * Middleware
-Global handlers that are called before each request
-* Router is the final middleware handler!
- Useful for providing services like authorization, logging, and error pages
- and serving static pages
+- Global handlers that are called for each request
+- Router is the final middleware handler!
+- Often used to add services to a request through `martini.Context`
+- Useful for providing services like authorization, logging, and error pages and serving static pages
+- A common patern is to implement middleware using a method that returns the handler. This allows capturing state within a closure
+  store := sessions.NewCookieStore([]byte("secret123"))
+  m.Use(sessions.Sessions("my_session", store)) // Sessions returns a function.
+                                                // The function is a closure
+                                                // that captures the session name and store
+
+* Introducing Martini-contrib
 
 * Render Middleware
 
@@ -140,6 +129,7 @@ Simplifies rendering HTML and JSON templates
 - Supports layouts & supplies a `yield` function for layouts to access the current template
 - Caching is supported and controlled through  the `MARTINI_ENV` env variable
 - Uses html/template for the rendering language
+- By default, templates are stored in `templates' directory, and referenced by the path + basename + ".tmpl"
 
   // add a middlware handler to enable rendering
   m.Use(render.Renderer(render.Options{Layout: "layout"}))
@@ -153,6 +143,12 @@ Binding middleware maps the values from an incoming request to a struct and pass
 - Fields can be marked as required (supports nested requires) :)
 - If a struct implements `binding.Validate`, the method will be called. If there is an error, an alternate handler can be specified. 
 
+	// Tell the binder to populate the Note struct with form data
+	m.Post("/create", binding.Bind(Note{}), NewNote)
+
+	// The Note is now available as a handler argument
+
+.code secondbrain/main.go /^func NewNote/,/^}/
 
 * Static
 Part of  `ClassicMartini`, the static middleware serves up static assets that reside in a specified directory.
@@ -163,11 +159,33 @@ Part of  `ClassicMartini`, the static middleware serves up static assets that re
   m.Use(martini.Static("public")
 - Is relative to your binary's working directory
 
+* And many more
+
+- secure - Middleware that implements a few quick security wins
+- auth - Handlers for authentication
+- gzip - gzip all requests
+- encoder - Encoder service for rendering data in multiple formats and content negotiation.
+
+See the full list at [[https://github.com/martini-contrib][github.com/martini-contrib]]
 
 * Testing
-  - Can use the "net/http/httptest"
-  - Make sure to design code to isolate the martini multiplexer from startup.
-  - 
+- Can use the "net/http/httptest"
+- Make sure to design code to isolate the martini multiplexer from startup.
+  
+	func TestRedeemGiftCertificate(t *testing.T) {
+		m := main.Shaken() // a method on main that configures, but doesnt `Run` the martini instance
+
+		response := httptest.NewRecorder()
+		request := NewRequest("POST", "/redeem", "application/json", `{"serial_number":"ADFKASDFASDK","account_id":3828, "amount":200}`)
+
+		m.ServeHTTP(response, request)
+
+		expect(t, http.StatusCreated, response.Code)
+	}
+
+* Putting it all together
+
+Demo time!
 
 
 * Issues (here be opinions)
