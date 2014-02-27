@@ -171,7 +171,7 @@ See the full list at [[https://github.com/martini-contrib][github.com/martini-co
 * Testing
 - Can use the "net/http/httptest"
 - Make sure to design code to isolate the martini multiplexer from startup.
-  
+
 	func TestRedeemGiftCertificate(t *testing.T) {
 		m := main.Shaken() // a method on main that configures, but doesnt `Run` the martini instance
 

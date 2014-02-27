@@ -10,7 +10,7 @@ import (
 	"github.com/martini-contrib/render"
 )
 
-//postgres://localhost/secondbrain?sslmode=disable")
+// example env PSQL_URI=postgres://localhost/secondbrain?sslmode=disable"
 func SetupDb() *sql.DB {
 	db, _ := sql.Open("postgres", os.Getenv("PSQL_URI"))
 	return db
