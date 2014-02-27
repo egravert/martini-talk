@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"net/http"
 	"os"
 
 	"github.com/codegangsta/martini"
@@ -48,5 +49,5 @@ func ShowNotes(r render.Render, ns NoteStorer) {
 func NewNote(note Note, r render.Render, ns NoteStorer) {
 	ns.Add(note)
 	notes := ns.All()
-	r.HTML(200, "notes", notes) // HLRENDER
+	r.HTML(http.StatusCreated, "notes", notes) // HLRENDER
 }
